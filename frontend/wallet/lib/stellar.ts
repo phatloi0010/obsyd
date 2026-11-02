@@ -1,8 +1,8 @@
 // Obsyd — Stellar testnet data layer (original). Server-side; used by API routes.
-import { Horizon, Networks, StrKey } from "@stellar/stellar-sdk";
-import { config } from "./config";
+import { type Horizon, StrKey } from "@stellar/stellar-sdk";
+import { config, horizon, networkPassphrase } from "./config";
 
-const server = new Horizon.Server(config.horizonUrl, { allowHttp: false });
+const server = horizon();
 
 export type ObsydBalance = {
   code: string; // XLM | asset code
@@ -119,5 +119,4 @@ function relTime(iso: string): string {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-export const networkPassphrase =
-  config.network === "public" ? Networks.PUBLIC : Networks.TESTNET;
+export { networkPassphrase };

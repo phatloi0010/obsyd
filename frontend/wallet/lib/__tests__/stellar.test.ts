@@ -1,8 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Keypair } from "@stellar/stellar-sdk";
-import { isValidStellarAddress, networkPassphrase } from "../stellar";
-import { config } from "../config";
-import { looksLikeStellarAddress } from "../config";
+import { isValidStellarAddress } from "../stellar";
+import {
+  config,
+  horizon,
+  looksLikeStellarAddress,
+  networkPassphrase,
+  parseNetwork,
+  rpcServer,
+} from "../config";
 
 describe("address validation", () => {
   it("accepts a real ed25519 account id", () => {
@@ -42,5 +48,28 @@ describe("network configuration", () => {
   it("the strict address matcher is the 56-character G form", () => {
     expect(looksLikeStellarAddress(Keypair.random().publicKey())).toBe(true);
     expect(looksLikeStellarAddress("M" + "A".repeat(55))).toBe(false);
+  });
+
+  it("throws on an invalid NEXT_PUBLIC_NETWORK value at startup", async () => {
+    expect(() => parseNetwork("mainnet")).toThrow(/Invalid NEXT_PUBLIC_NETWORK/);
+    expect(() => parseNetwork("devnet")).toThrow(/Invalid NEXT_PUBLIC_NETWORK/);
+    expect(parseNetwork("testnet")).toBe("testnet");
+    expect(parseNetwork("public")).toBe("public");
+
+    const prev = process.env.NEXT_PUBLIC_NETWORK;
+    process.env.NEXT_PUBLIC_NETWORK = "mainnet";
+    vi.resetModules();
+    try {
+      await expect(import("../config")).rejects.toThrow(/Invalid NEXT_PUBLIC_NETWORK/);
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_NETWORK;
+      else process.env.NEXT_PUBLIC_NETWORK = prev;
+      vi.resetModules();
+    }
+  });
+
+  it("exports shared horizon() and rpcServer() clients from config", () => {
+    expect(horizon()).toBe(horizon());
+    expect(rpcServer()).toBe(rpcServer());
   });
 });

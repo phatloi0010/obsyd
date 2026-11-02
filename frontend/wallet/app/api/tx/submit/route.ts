@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { Horizon, Transaction, Networks } from "@stellar/stellar-sdk";
-import { config } from "@/lib/config";
+import { Transaction } from "@stellar/stellar-sdk";
+import { horizon, networkPassphrase } from "@/lib/config";
 import { readBody, refuse } from "@/lib/custody";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const allowHttp = config.network === "testnet";
-const server = new Horizon.Server(config.horizonUrl, { allowHttp });
-const passphrase = config.network === "public" ? Networks.PUBLIC : Networks.TESTNET;
+const server = horizon();
+const passphrase = networkPassphrase;
 
 /**
  * POST /api/tx/submit — relay an envelope the wallet already signed.

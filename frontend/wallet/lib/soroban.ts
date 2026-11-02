@@ -12,27 +12,23 @@ import {
   Address,
   Account,
   Contract,
-  Networks,
   Operation,
   TransactionBuilder,
   nativeToScVal,
   scValToNative,
   authorizeInvocation,
-  Horizon,
 } from "@stellar/stellar-sdk";
-import { config } from "./config";
+import { horizon as getHorizon, networkPassphrase, rpcServer } from "./config";
 
-export const NETWORK_PASSPHRASE =
-  config.network === "public" ? Networks.PUBLIC : Networks.TESTNET;
+export const NETWORK_PASSPHRASE = networkPassphrase;
 
 // Live Soroswap testnet factory + router. Mainnet equivalents are different and
 // must be supplied via env before a mainnet demo (see README "Networks").
 export const FACTORY = process.env.NEXT_PUBLIC_SOROSWAP_FACTORY || "CDP3HMUH6SMS3S7NPGNDJLULCOXXEPSHY4JKUKMBNQMATHDHWXRRJTBY";
 export const ROUTER = process.env.NEXT_PUBLIC_SOROSWAP_ROUTER || "CCJUD55AG6W5HAI5LRVNKAE5WDP5XGZBUDS5WNTIVDU7O264UZZE7BRD";
 
-const allowHttp = config.network === "testnet";
-const soroban = new rpc.Server(config.sorobanRpcUrl, { allowHttp });
-const horizon = new Horizon.Server(config.horizonUrl, { allowHttp });
+const soroban = rpcServer();
+const horizon = getHorizon();
 
 export const DECIMALS = 7;
 export const ONE = 10n ** BigInt(DECIMALS);

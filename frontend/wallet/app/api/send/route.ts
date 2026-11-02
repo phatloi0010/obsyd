@@ -1,21 +1,18 @@
 import { NextResponse } from "next/server";
 import {
-  Horizon,
   TransactionBuilder,
   Operation,
   Asset,
-  Networks,
   StrKey,
 } from "@stellar/stellar-sdk";
-import { config } from "@/lib/config";
+import { config, horizon, networkPassphrase } from "@/lib/config";
 import { readBody, refuse } from "@/lib/custody";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const allowHttp = config.network === "testnet";
-const server = new Horizon.Server(config.horizonUrl, { allowHttp });
-const passphrase = config.network === "public" ? Networks.PUBLIC : Networks.TESTNET;
+const server = horizon();
+const passphrase = networkPassphrase;
 
 /**
  * POST /api/send — build an **unsigned** native (XLM) payment and return its XDR.
